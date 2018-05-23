@@ -16,8 +16,6 @@ start:
 start32:
 	# Set up the protected-mode data segment registers
 	movw $0x10, %ax
-	movw %ax, %ds			# %DS=%AX
-	movw %ax, %es			# %ES=%AX
 	movw %ax, %ss			# %SS=%AX
 	movw %ax, %fs			# %FS=%AX
 	movw $0x18, %ax

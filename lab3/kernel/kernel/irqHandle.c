@@ -16,6 +16,8 @@ void irqHandle(struct TrapFrame *tf) {
 		case 0xd:
 			GProtectFaultHandle(tf);
 			break;
+		csse 0x20:
+			syscallHandle(tf);
 		case 0x80:
 			syscallHandle(tf);
 			break;
@@ -53,11 +55,23 @@ void sys_write(struct TrapFrame *tf) {
 	tf->eax = 1;
 }
 
+void sys_fork(tf){
+	
+}
+
 void syscallHandle(struct TrapFrame *tf) {
 	/* 实现系统调用*/
-	if(tf->eax != 4)
-		assert(0);
-	sys_write(tf);
+	switch(tf->eax){
+		case 2:
+			sys_fork(tf);
+			break;
+		case 4:
+			sys_write(tf);
+			break;
+		default:
+			assert(0);
+	}
+
 }
 
 void GProtectFaultHandle(struct TrapFrame *tf){

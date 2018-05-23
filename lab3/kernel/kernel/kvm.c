@@ -40,7 +40,8 @@ void initSeg() {
 	/*
 	 * 初始化TSS
 	 */
-	tss.esp0 = 0x200000;   // set kernel esp to 0x200,000
+	//tss.esp0 = 0x200000;   // set kernel esp to 0x200,000
+	tss.esp0 = (uint32_t)&pcb[0].stack[KERNEL_STACK_SIZE];
 	tss.ss0  = KSEL(SEG_KDATA);
 	asm volatile("ltr %%ax":: "a" (KSEL(SEG_TSS)));
 
@@ -57,6 +58,10 @@ void initSeg() {
 }
 
 void enterUserSpace(uint32_t entry) {
+	asm volatile("movl %0, %%eax":: "r"(USEL(SEG_UDATA)));
+	asm volatile("movw %ax, %ds");
+	asm volatile("movw %ax, %es");
+	asm volatile("movw %ax, %fs");
 	/*
 	 * Before enter user space
 	 * you should set the right segment registers here
