@@ -11,6 +11,12 @@ irqGProtectFault:
 	pushl $0xd
 	jmp asmDoIrq
 
+.global irqTimer
+irqTimer:
+	pushl $0 // push dummy error code
+	pushl $0x20 //push interrupt vector into kernel stack
+	jmp asmDoIrq
+
 .global irqSyscall
 irqSyscall:
 	pushl $0 // push dummy error code

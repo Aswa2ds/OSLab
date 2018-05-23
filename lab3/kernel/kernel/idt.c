@@ -46,9 +46,11 @@ void initIdt() {
 	 * init your idt here
 	 * 初始化 IDT 表, 为中断设置中断处理函数
 	 */
-	
+
 	setTrap(idt + 0xd, SEG_KCODE, (uint32_t)irqGProtectFault, DPL_KERN);
-	
+
+	setIntr(idt + 0x20, SEG_KCODE, (uint32_t)irqTimer, DPL_KERN);
+
 	setIntr(idt + 0x80, SEG_KCODE, (uint32_t)irqSyscall, DPL_USER); // for int 0x80, interrupt vector is 0x80, Interruption is disabled
 
 	/* 写入IDT */
