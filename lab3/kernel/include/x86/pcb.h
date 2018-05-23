@@ -13,7 +13,7 @@ struct ProcessTable {
     int timeCount;
     int sleepTime;
     uint32_t pid;
-    struct ProcessTable *next, *pre;
+    struct ProcessTable *next;
 };
 
 ProcessTable pcb[MAX_PCB_NUM];
