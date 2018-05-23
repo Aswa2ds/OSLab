@@ -4,6 +4,8 @@
 #define MAX_STACK_SIZE 16 << 8
 #define MAX_PCB_NUM 20
 
+enum { BLOCKED, DEAD, RUNNING, RUNNABLE };
+
 struct ProcessTable {
     uint32_t stack[MAX_STACK_SIZE]; // 内核堆栈
     struct TrapFrame tf;
@@ -11,10 +13,9 @@ struct ProcessTable {
     int timeCount;
     int sleepTime;
     uint32_t pid;
-    struct ProcessTable *next;
+    struct ProcessTable *next, *pre;
 };
 
-struct ProcessTable pcb[MAX_PCB_NUM];
-
+ProcessTable pcb[MAX_PCB_NUM];
 
 #endif
