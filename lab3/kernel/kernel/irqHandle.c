@@ -56,6 +56,7 @@ void sys_write(struct TrapFrame *tf) {
 }
 
 void sys_fork(tf){
+	struct ProcessTable *p = new struct ProcessTable;
 	
 }
 

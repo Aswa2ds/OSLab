@@ -58,21 +58,22 @@ void initSeg() {
 }
 
 void enterUserSpace(uint32_t entry) {
-	asm volatile("movl %0, %%eax":: "r"(USEL(SEG_UDATA)));
+	/*asm volatile("movl %0, %%eax":: "r"(USEL(SEG_UDATA)));
 	asm volatile("movw %ax, %ds");
 	asm volatile("movw %ax, %es");
-	asm volatile("movw %ax, %fs");
+	asm volatile("movw %ax, %fs");*/
 	/*
 	 * Before enter user space
 	 * you should set the right segment registers here
 	 * and use 'iret' to jump to ring3
 	*/
-	asm volatile("pushl %0":: "r"(USEL(SEG_UDATA)));	// %ss
+	/*asm volatile("pushl %0":: "r"(USEL(SEG_UDATA)));	// %ss
 	asm volatile("pushl %0":: "r"(128 << 20));			// %esp 128MB
 	asm volatile("pushfl");								// %eflags
 	asm volatile("pushl %0":: "r"(USEL(SEG_UCODE)));	// %cs
-	asm volatile("pushl %0":: "r"(entry));				// %eip
-
+	asm volatile("pushl %0":: "r"(entry));				// %eip*/
+	struct ProcessTable *p = create_pcb();
+	
 	asm volatile("iret");
 }
 

@@ -16,6 +16,13 @@ struct ProcessTable {
     struct ProcessTable *next;
 };
 
-ProcessTable pcb[MAX_PCB_NUM];
+struct ProcessTable pcb[MAX_PCB_NUM];
+struct ProcessTable *next_pcb;
+struct ProcessTable *now_pcb;
+struct ProcessTable *head_pcb;
+
+void init_pcb();
+void insert(struct ProcessTable*);
+struct ProcessTable *create_pcb();
 
 #endif
