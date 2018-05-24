@@ -41,7 +41,7 @@ void initSeg() {
 	 * 初始化TSS
 	 */
 	//tss.esp0 = 0x200000;   // set kernel esp to 0x200,000
-	tss.esp0 = (uint32_t)&pcb[0].stack[KERNEL_STACK_SIZE];
+	tss.esp0 = (uint32_t)&pcb[0].stack[MAX_STACK_SIZE];
 	tss.ss0  = KSEL(SEG_KDATA);
 	asm volatile("ltr %%ax":: "a" (KSEL(SEG_TSS)));
 
@@ -72,8 +72,31 @@ void enterUserSpace(uint32_t entry) {
 	asm volatile("pushfl");								// %eflags
 	asm volatile("pushl %0":: "r"(USEL(SEG_UCODE)));	// %cs
 	asm volatile("pushl %0":: "r"(entry));				// %eip*/
-	struct ProcessTable *p = create_pcb();
-	
+	struct ProcessTable *p = &pcb[0];
+	asm volatile("movl %0, %%eax":: "r"(USEL(SEG_UDATA)));
+	asm volatile("movw %ax, %ds");
+	asm volatile("movw %ax, %es");
+	asm volatile("movw %ax, %fs");
+
+	p->tf.ss = USEL(SEG_UDATA);
+	p->tf.esp = 0x200000 + (1 << 16);
+
+	asm volatile("sti");
+	asm volatile("pushfl");
+	asm volatile("cli");
+
+	asm volatile("movl (%%esp), %0" : "=r"(p->tf.eflags) :);
+
+	p->tf.cs = USEL(SEG_UCODE);
+	p->tf.eip = entry;
+	p->state = RUNNING;
+	p->sleepTime = 0;
+	p->timeCount = 16;
+	p->pid = 520;
+	current = 0;
+	ProcessNum = 1;
+
+	asm volatile("movl %0, %%esp" ::"r"(&p->tf.eip));
 	asm volatile("iret");
 }
 

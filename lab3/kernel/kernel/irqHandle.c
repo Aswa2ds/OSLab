@@ -3,6 +3,8 @@
 
 void syscallHandle(struct TrapFrame *tf);
 
+void timerHandle(struct TrapFrame *tf);
+
 void GProtectFaultHandle(struct TrapFrame *tf);
 
 void irqHandle(struct TrapFrame *tf) {
@@ -10,18 +12,30 @@ void irqHandle(struct TrapFrame *tf) {
 	 * 中断处理程序
 	 */
 	/* Reassign segment register */
+	asm volatile("movl %0, %%eax" ::"r"(KSEL(SEG_KDATA)));
+    asm volatile("movw %ax, %ds");
+    asm volatile("movw %ax, %fs");
+    asm volatile("movw %ax, %es");
+    asm volatile("movl %0, %%eax" ::"r"(KSEL(SEG_VIDEO)));
+    asm volatile("movw %ax, %gs");
+
 	switch(tf->irq) {
 		case -1:
 			break;
 		case 0xd:
 			GProtectFaultHandle(tf);
 			break;
-		csse 0x20:
-			syscallHandle(tf);
+		case 0x20:
+			//panic_s("int 0x20");
+			timerHandle(tf);
+			break;
 		case 0x80:
+			panic_s("int 0x80");
 			syscallHandle(tf);
 			break;
-		default:assert(0);
+		default:
+			panic_s("GP!!!!!!!!!!!!!");
+			assert(0);
 	}
 }
 
@@ -55,9 +69,26 @@ void sys_write(struct TrapFrame *tf) {
 	tf->eax = 1;
 }
 
-void sys_fork(tf){
-	struct ProcessTable *p = new struct ProcessTable;
-	
+void sys_fork(struct TrapFrame *tf){
+	struct ProcessTable *p = &pcb[1];
+	struct ProcessTable *q = &pcb[0];
+
+	int i;
+	for(i = 0; i < MAX_STACK_SIZE; ++i)
+		p->stack[i] = q->stack[i];
+
+	int src = 0x200000;
+	int dest = 0x210000;
+	for(i = 0; i < 10000; ++i)
+		*(uint8_t*)(dest + i) = *(uint8_t*)(src + i);
+	for(i = 0; i < sizeof(struct TrapFrame); ++i)
+		p->tf_block[i] = q->tf_block[i];
+	p->pid = q->pid + 1;
+	p->sleepTime = 0;
+	p->timeCount = 16;
+	p->state = RUNNABLE;
+	ProcessNum++;
+	schedule();
 }
 
 void syscallHandle(struct TrapFrame *tf) {
@@ -73,6 +104,30 @@ void syscallHandle(struct TrapFrame *tf) {
 			assert(0);
 	}
 
+}
+
+void timerHandle(struct TrapFrame *tf){
+	if(pcb[0].sleepTime > 0)
+		if(--pcb[0].sleepTime == 0)
+			pcb[0].state = RUNNABLE;
+
+	if(pcb[0].sleepTime > 0)
+		if(--pcb[0].sleepTime == 0)
+			pcb[0].state = RUNNABLE;
+
+	if(current == -1){
+		schedule();
+		return ;
+	}
+
+	pcb[current].timeCount -= 1;
+	if(pcb[current].timeCount == 0){
+		pcb[current].state = RUNNABLE;
+        pcb[current].timeCount = 16;
+        panic_i(pcb[current].timeCount);
+        schedule();
+	}
+	return ;
 }
 
 void GProtectFaultHandle(struct TrapFrame *tf){

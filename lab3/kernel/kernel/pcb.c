@@ -1,6 +1,6 @@
 #include "x86.h"
 
-void init_pcb(){
+/*void init_pcb(){
     int i = 0;
     for(; i < MAX_PCB_NUM - 1; ++i)
         pcb[i]->next = &pcb[i+i];
@@ -8,9 +8,9 @@ void init_pcb(){
     next_pcb = &pcb[0];
     now_pcb = NULL;
     head_pcb = NULL;
-}
+}*/
 
-void insert(struct ProcessTable *p){
+/*void insert(struct ProcessTable *p){
     if(head_pcb == NULL)
         head_pcb = p;
     else{
@@ -30,4 +30,17 @@ struct ProcessTable *create_pcb(){
     p->next = NULL;
     insert(p);
     return p;
+}*/
+
+void IDLE() {
+    asm volatile("movl %0, %%esp;" ::"i"(0x200000));
+    asm volatile("sti");
+    while(1)
+        waitForInterrupt();
+}
+
+void schedule(){
+    panic_i(current);
+
+
 }

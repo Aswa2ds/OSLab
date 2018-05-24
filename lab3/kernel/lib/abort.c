@@ -40,3 +40,23 @@ int abort(const char *fname, int line) {
 		waitForInterrupt();
 	}
 }
+
+#define PANIC_TEXT "PPPPPPANIC: "
+void panic_i(int num){
+	static char buf[256] = PANIC_TEXT;
+	char *p = buf + sizeof(PANIC_TEXT) - 1;
+	append(&p, i2A(num));
+	append(&p, "\n");
+	for(p = buf; *p; p ++) {
+		putChar(*p);
+	}
+}
+void panic_s(const char* line){
+	static char buf[256] = PANIC_TEXT;
+	char *p = buf + sizeof(PANIC_TEXT) - 1;
+	append(&p, line);
+	append(&p, "\n");
+	for(p = buf; *p; p ++) {
+		putChar(*p);
+	}
+}

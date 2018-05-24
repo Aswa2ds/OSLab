@@ -35,6 +35,7 @@ static void setTrap(struct GateDescriptor *ptr, uint32_t selector, uint32_t offs
 void irqEmpty();
 void irqGProtectFault();
 void irqSyscall();
+void irqTimer();
 
 void initIdt() {
 	int i;

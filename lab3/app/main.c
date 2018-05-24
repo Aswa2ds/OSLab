@@ -24,13 +24,14 @@ int uEntry(void) {
         }
         exit();
     }*/
-    int ret = fork();
-    if(ret == 0){
+    //printf("yingyingying\n");
+    fork();
+    /*if(ret == 0){
         printf("ping\n");
     }
     else {
         printf("pong\n");
-    }
+    }*/
 
     return 0;
 }
