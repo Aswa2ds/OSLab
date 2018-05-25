@@ -4,10 +4,17 @@
 
 static char *i2A(int a) {
 	static char buf[30];
+	int nag = 0;
 	char *p = buf + sizeof(buf) - 1;
+	if(a < 0){
+		a = -a;
+		nag = 1;
+	}
 	do {
 		*--p = '0' + a % 10;
 	} while (a /= 10);
+	if(nag)
+		*--p = '-';
 	return p;
 }
 

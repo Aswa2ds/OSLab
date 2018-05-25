@@ -12,6 +12,7 @@ void irqHandle(struct TrapFrame *tf) {
 	 * 中断处理程序
 	 */
 	/* Reassign segment register */
+	//panic_i(tf->eip);
 	asm volatile("movl %0, %%eax" ::"r"(KSEL(SEG_KDATA)));
     asm volatile("movw %ax, %ds");
     asm volatile("movw %ax, %fs");
@@ -30,7 +31,7 @@ void irqHandle(struct TrapFrame *tf) {
 			timerHandle(tf);
 			break;
 		case 0x80:
-			panic_s("int 0x80");
+			//panic_s("int 0x80");
 			syscallHandle(tf);
 			break;
 		default:
@@ -53,8 +54,8 @@ void sys_write(struct TrapFrame *tf) {
 	static int row = 0, col = 0;
 	int i;
 	for(i = 0; i < tf->ecx; ++i){
-		char ch = *(char*)(tf->ebx+i);
-		putChar(ch);
+		char ch = *(char*)(tf->ebx + (current) * (1 << 16) + i);
+ 	 	putChar(ch);
 		if(ch == '\n'){
 			row++;
 			col = 0;
@@ -69,37 +70,59 @@ void sys_write(struct TrapFrame *tf) {
 	tf->eax = 1;
 }
 
+void sys_sleep(struct TrapFrame *tf){
+	pcb[current].sleepTime = tf->ebx;
+	pcb[current].state = BLOCKED;
+	//panic_i(current);
+	current = -1;
+	schedule();
+}
+
+void sys_exit(struct TrapFrame *tf){
+	pcb[current].state = DEAD;
+	current = -1;
+	ProcessNum -= 1;
+	schedule();
+}
+
 void sys_fork(struct TrapFrame *tf){
+
 	struct ProcessTable *p = &pcb[1];
 	struct ProcessTable *q = &pcb[0];
-
+	//panic_i(q->tf.eip);
 	int i;
 	for(i = 0; i < MAX_STACK_SIZE; ++i)
 		p->stack[i] = q->stack[i];
 
-	int src = 0x200000;
-	int dest = 0x210000;
-	for(i = 0; i < 10000; ++i)
+	uint32_t src = 0x200000;
+	uint32_t dest = 0x210000;
+	for(i = 0; i < 0x10000; ++i)
 		*(uint8_t*)(dest + i) = *(uint8_t*)(src + i);
-	for(i = 0; i < sizeof(struct TrapFrame); ++i)
-		p->tf_block[i] = q->tf_block[i];
 	p->pid = q->pid + 1;
 	p->sleepTime = 0;
 	p->timeCount = 16;
 	p->state = RUNNABLE;
 	ProcessNum++;
-	schedule();
+	p->tf.eax = 0;
+	q->tf.eax = p->pid;
+	//panic_s("HERE!");
+	//schedule();
 }
 
 void syscallHandle(struct TrapFrame *tf) {
 	/* 实现系统调用*/
 	switch(tf->eax){
+		case 1:
+			sys_exit(tf);
+			break;
 		case 2:
 			sys_fork(tf);
 			break;
 		case 4:
 			sys_write(tf);
 			break;
+		case 200:
+			sys_sleep(tf);
 		default:
 			assert(0);
 	}
@@ -107,13 +130,14 @@ void syscallHandle(struct TrapFrame *tf) {
 }
 
 void timerHandle(struct TrapFrame *tf){
+	//panic_i(pcb[0].sleepTime);
 	if(pcb[0].sleepTime > 0)
 		if(--pcb[0].sleepTime == 0)
 			pcb[0].state = RUNNABLE;
 
-	if(pcb[0].sleepTime > 0)
-		if(--pcb[0].sleepTime == 0)
-			pcb[0].state = RUNNABLE;
+	if(pcb[1].sleepTime > 0)
+		if(--pcb[1].sleepTime == 0)
+			pcb[1].state = RUNNABLE;
 
 	if(current == -1){
 		schedule();
@@ -124,7 +148,6 @@ void timerHandle(struct TrapFrame *tf){
 	if(pcb[current].timeCount == 0){
 		pcb[current].state = RUNNABLE;
         pcb[current].timeCount = 16;
-        panic_i(pcb[current].timeCount);
         schedule();
 	}
 	return ;

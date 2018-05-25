@@ -105,3 +105,10 @@ void printf(const char *format,...){
 int fork(){
 	return syscall(2, 0, 0);
 }
+
+void sleep(uint32_t seconds){
+	syscall(200, seconds, 0);
+}
+void exit(){
+	syscall(1, 0, 0);
+}

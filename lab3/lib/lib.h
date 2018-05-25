@@ -4,7 +4,7 @@
 
 void printf(const char *format,...);
 int fork();
-//int sleep(uint32_t time);
-//int exit();
+void sleep(uint32_t);
+void exit();
 
 #endif

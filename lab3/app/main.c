@@ -3,7 +3,7 @@
 int data = 0;
 
 int uEntry(void) {
-    /*int ret = fork();
+    int ret = fork();
     int i = 8;
 
     if (ret == 0) {
@@ -23,15 +23,7 @@ int uEntry(void) {
             sleep(128);
         }
         exit();
-    }*/
-    //printf("yingyingying\n");
-    fork();
-    /*if(ret == 0){
-        printf("ping\n");
     }
-    else {
-        printf("pong\n");
-    }*/
 
     return 0;
 }
