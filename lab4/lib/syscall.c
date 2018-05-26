@@ -1,4 +1,5 @@
 #include "lib.h"
+#include "sem.h"
 #include <stdarg.h>
 
 /*
@@ -111,4 +112,8 @@ void sleep(uint32_t seconds){
 }
 void exit(){
 	syscall(1, 0, 0);
+}
+
+int sem_init(int32_t *sem, int value){
+	return syscall(100, (uint32_t)sem, value);
 }
