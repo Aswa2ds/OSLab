@@ -1,4 +1,5 @@
 #include "lib.h"
+#include "sem.h"
 #include "types.h"
 
 int uEntry(void) {

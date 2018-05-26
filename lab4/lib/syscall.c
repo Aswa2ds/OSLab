@@ -117,3 +117,15 @@ void exit(){
 int sem_init(int32_t *sem, int value){
 	return syscall(100, (uint32_t)sem, value);
 }
+
+void sem_wait(int32_t *sem){
+	syscall(101, (uint32_t)sem, 0);
+}
+
+void sem_post(int32_t *sem){
+	syscall(102, (uint32_t)sem, 0);
+}
+
+void sem_destroy(int32_t *sem){
+	syscall(103, (uint32_t)sem, 0);
+}

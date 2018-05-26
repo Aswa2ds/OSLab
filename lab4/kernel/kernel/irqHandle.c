@@ -109,6 +109,39 @@ void sys_fork(struct TrapFrame *tf){
 	//schedule();
 }
 
+void sys_sem_init(struct TrapFrame *tf){
+	tf->ebx += (current * (1 << 16));
+	sem_t *sem = (sem_t*)tf->ebx;
+	semaphore.value = tf->ecx;
+	*sem = 0;
+	tf->eax = 0;
+}
+
+void sys_sem_wait(struct TrapFrame *tf){
+	if(--semaphore.value < 0){
+		pcb[current].state = BLOCKED;
+		semaphore.waiting = current;
+		current = -1;
+		schedule();
+	}
+}
+
+void sys_sem_post(struct TrapFrame *tf){
+	if(++semaphore.value == 0){
+		int wake = semaphore.waiting;
+		assert(wake == 1);
+		pcb[wake].state = RUNNABLE;
+		pcb[wake].timeCount = 16;
+		pcb[current].state = RUNNABLE;
+		//pcb[current].timeCount = 16;
+		schedule();
+	}
+}
+
+void sys_sem_destory(struct TrapFrame *tf){
+	return;
+}
+
 void syscallHandle(struct TrapFrame *tf) {
 	/* 实现系统调用*/
 	switch(tf->eax){
@@ -123,6 +156,19 @@ void syscallHandle(struct TrapFrame *tf) {
 			break;
 		case 200:
 			sys_sleep(tf);
+			break;
+		case 100:
+			sys_sem_init(tf);
+			break;
+		case 101:
+			sys_sem_wait(tf);
+			break;
+		case 102:
+			sys_sem_post(tf);
+			break;
+		case 103:
+			sys_sem_destory(tf);
+			break;
 		default:
 			assert(0);
 	}
