@@ -139,7 +139,13 @@ void sys_sem_post(struct TrapFrame *tf){
 }
 
 void sys_sem_destory(struct TrapFrame *tf){
-	return;
+	if(pcb[current].pid == 521)
+		return;
+	else if(pcb[current].pid == 520){
+		tf->ebx += (current * (1 << 16));
+		sem_t *sem = (sem_t*)tf->ebx;
+		*sem = -1;
+	}
 }
 
 void syscallHandle(struct TrapFrame *tf) {
