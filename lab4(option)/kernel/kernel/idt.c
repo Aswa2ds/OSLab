@@ -36,6 +36,7 @@ void irqEmpty();
 void irqGProtectFault();
 void irqSyscall();
 void irqTimer();
+void irqKeyBoard();
 
 void initIdt() {
 	int i;
@@ -54,6 +55,7 @@ void initIdt() {
 
 	setIntr(idt + 0x80, SEG_KCODE, (uint32_t)irqSyscall, DPL_USER); // for int 0x80, interrupt vector is 0x80, Interruption is disabled
 
+	setIntr(idt + 0x21, SEG_KCODE, (uint32_t)irqKeyBoard, DPL_USER);
 	/* 写入IDT */
 	saveIdt(idt, sizeof(idt));
 }

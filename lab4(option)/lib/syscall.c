@@ -129,3 +129,7 @@ void sem_post(int32_t *sem){
 void sem_destroy(int32_t *sem){
 	syscall(103, (uint32_t)sem, 0);
 }
+
+char getchar(){
+	return syscall(104, 0, 0);
+}

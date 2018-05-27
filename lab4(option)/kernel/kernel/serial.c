@@ -21,6 +21,7 @@ void putChar(char ch) {
 }
 
 uint32_t getKeyCode() {
+
     uint32_t code = inByte(0x60);
     uint32_t val = inByte(0x61);
     outByte(0x61, val | 0x80);

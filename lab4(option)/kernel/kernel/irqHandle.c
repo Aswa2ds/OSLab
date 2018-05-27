@@ -5,6 +5,8 @@ void syscallHandle(struct TrapFrame *tf);
 
 void timerHandle(struct TrapFrame *tf);
 
+void irqKeyBoardHandle(struct TrapFrame *tf);
+
 void GProtectFaultHandle(struct TrapFrame *tf);
 
 void irqHandle(struct TrapFrame *tf) {
@@ -30,6 +32,9 @@ void irqHandle(struct TrapFrame *tf) {
 			//panic_s("int 0x20");
 			timerHandle(tf);
 			break;
+		case 0x21:
+			irqKeyBoardHandle(tf);
+			break;
 		case 0x80:
 			//panic_s("int 0x80");
 			syscallHandle(tf);
@@ -37,6 +42,18 @@ void irqHandle(struct TrapFrame *tf) {
 		default:
 			panic_s("GP!!!!!!!!!!!!!");
 			assert(0);
+	}
+}
+
+char buffer[100];
+int top = -1;
+char *translate = "\n\n1234567890-=\n\nqwertyuiop[]\n\nasdfghjkl;'\n\n\nzxcvbnm,./\n\n\n\n";
+
+void irqKeyBoardHandle(struct TrapFrame *tf){
+	uint32_t code = inByte(0x60);
+	if(code <= 0x80){
+		buffer[++top] = translate[code];
+		putChar(buffer[top]);
 	}
 }
 
@@ -139,7 +156,34 @@ void sys_sem_post(struct TrapFrame *tf){
 }
 
 void sys_sem_destory(struct TrapFrame *tf){
-	return;
+	if(pcb[current].pid == 521)
+		return;
+	else if(pcb[current].pid == 520){
+		tf->ebx += (current * (1 << 16));
+		sem_t *sem = (sem_t*)tf->ebx;
+		*sem = -1;
+	}
+}
+
+int intr_nesting;
+
+void wait_for_keyboard(int char_num){
+    while(1) {
+    	if(char_num >= 0){
+			//printk("%d, %d\n", buf_out, buf_in);
+			asm volatile("sti");
+			asm volatile("hlt");
+			asm volatile("cli");
+    	}
+    	else{
+			break;
+    	}
+    }
+}
+
+void sys_get_char(struct TrapFrame *tf){
+	wait_for_keyboard(0);
+	tf->eax = buffer[top--];
 }
 
 void syscallHandle(struct TrapFrame *tf) {
@@ -168,6 +212,9 @@ void syscallHandle(struct TrapFrame *tf) {
 			break;
 		case 103:
 			sys_sem_destory(tf);
+			break;
+		case 104:
+			sys_get_char(tf);
 			break;
 		default:
 			assert(0);

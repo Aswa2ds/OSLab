@@ -23,4 +23,6 @@ initIntr(void) {
 	outByte(PORT_PIC_MASTER, 0x0A);
 	outByte(PORT_PIC_SLAVE, 0x68);
 	outByte(PORT_PIC_SLAVE, 0x0A);
+
+	//outByte(PORT_PIC_MASTER + 1, 33);
 }

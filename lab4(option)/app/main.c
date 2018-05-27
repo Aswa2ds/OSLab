@@ -7,6 +7,9 @@ int uEntry(void) {
     int ret = 0;
     int value = 2;
 
+    char ch = getchar();
+    printf("%c", ch);
+
     sem_t sem;
     printf("Father Process: Semaphore Initializing.\n");
     ret = sem_init(&sem, value);
@@ -39,6 +42,9 @@ int uEntry(void) {
         sem_destroy(&sem);
         exit();
     }
+
+    ch = getchar();
+    printf("%c", ch);
 
     return 0;
 }

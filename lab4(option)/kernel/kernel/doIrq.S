@@ -17,6 +17,12 @@ irqTimer:
 	pushl $0x20 //push interrupt vector into kernel stack
 	jmp asmDoIrq
 
+.global irqKeyBoard
+irqKeyBoard:
+	pushl $0 // push dummy error code
+	pushl $0x21 //push interrupt vector into kernel stack
+	jmp asmDoIrq
+
 .global irqSyscall
 irqSyscall:
 	pushl $0 // push dummy error code
