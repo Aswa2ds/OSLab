@@ -90,26 +90,26 @@
 
 代码实现如下：
 
-    ```
-    #define MAX_STACK_SIZE (16 << 10)
+```
+#define MAX_STACK_SIZE (16 << 10)
 
-    enum { BLOCKED, DEAD, RUNNING, RUNNABLE };
+enum { BLOCKED, DEAD, RUNNING, RUNNABLE };
 
-    struct ProcessTable {
+struct ProcessTable {
 
-        union{
-            uint8_t stack[MAX_STACK_SIZE];
-            struct {
-                uint8_t pad0[MAX_STACK_SIZE - sizeof(struct TrapFrame)];
-                struct TrapFrame tf;
-            };
+    union{
+        uint8_t stack[MAX_STACK_SIZE];
+        struct {
+            uint8_t pad0[MAX_STACK_SIZE - sizeof(struct TrapFrame)];
+            struct TrapFrame tf;
         };
-        int state;
-        int timeCount;     
-        int sleepTime;
-        uint32_t pid;
     };
-    ```
+    int state;
+    int timeCount;     
+    int sleepTime;
+    uint32_t pid;
+};
+```
 
 + 由于用户程序中仅有两个进程，为了简化进程切换的过程，降低实现的难度，我仅申请了两个`pcb`用来分别记录父子进程的状态，并利用变量`current`记录当前运行的进程  
 
